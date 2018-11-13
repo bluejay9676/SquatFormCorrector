@@ -31,7 +31,8 @@ class SquatFormCorrector:
     def __init__(self, input_source=0, mode="MPI", write_flag=False, output_file_name="output.avi"):
         # Set config.
         self.write_flag = write_flag
-        if mode is "MPI" :
+        self.mode = mode
+        if self.mode is "MPI" :
             protoFile = "pose/mpi/pose_deploy_linevec_faster_4_stages.prototxt"
             weightsFile = "pose/mpi/pose_iter_160000.caffemodel"
             self.pose_pairs = [ [1,14], [1,2], [1,5], [14,8], [14,11], [8,9], [9,10], [11,12], [12,13] ]
@@ -64,18 +65,24 @@ class SquatFormCorrector:
         """
         cos_t = abs(pair1[0] - pair2[0]) / abs(pair1[1] - pair2[1])
         return 90 / math.pi - math.acos(cos_t)
+
+    @staticmethod
+    def _get_dist(pair1, pair2):
+        return sqrt(abs(pair1[0] - pair2[0]) ** 2 + abs(pair1[1] - pair2[1]) ** 2)
     
     def _is_wrong_form(self, is_side):
         """
         Detect wrong squat form.
-        If side view:
+        The side view isn't working very well while
+        the front view performs reasonably.
+        If side view: 
             1. Neck -> Back -> Groin == linear?
                 - Get angle from neck to back, and back to groin
                 - Are the angles close (< 3)?
             2. Knee farther than Feet?
                 - Feet.x + 5 (in the direction opposite to groin) < knee.x
             3. Hip under Knee?
-                - groin.y < knee.y
+                - groin.y - knee.y is around +5 or sth?
             4. Bar path (or neck path) == linear?
                 - TODO
         If front view:
@@ -83,8 +90,25 @@ class SquatFormCorrector:
                 - shoulder1.x - shoulder2.x == feet1.x - feet2.x
             2. Are knees forming 11? (it should form M like shape)
                 - Get angle from feet to knee. Are they relatively forming 11?
+            3. Hip under Knee?
+                - groin.y - knee.y is around +5 or sth?
         """
-        raise NotImplementedError # TODO implement
+        # Check front view
+        # Check if the points are above the threshold.
+        if (self.point_position[2] or self.point_position[5] or self.point_position[10] or self.point_position[13])
+            shoulder_width = self._get_dist(self.point_position[2], self.point_position[5])
+            feet_width = self._get_dist(self.point_position[10], self.point_position[13])
+            if abs(shoulder_width - feet_width) < 0.5:
+                return "Shoulder width stance Bro!"
+        if (self.point_position[9] or self.point_position[10] or self.point_position[12] or self.point_position[13]):
+            left_angle = self._get_angle(self.point_position[9], self.point_position[10])
+            right_angle = self._get_angle(self.point_position[12], self.point_position[13])
+            if abs(left_angle - right_angle) < 0.5:
+                return "Knees out Bro!"
+        if (self.point_position[8] or self.point_position[9] or self.point_position[11] or self.point_position[12]):
+            if (self.point_position[8][1] > self.point_position[9][1]) and (self.point_position[11][1] > self.point_position[12][1]):
+                return "ATG Bro!"
+        return None
 
     def process(self, is_side, delay_rate=200, draw_skeleton=True):
         while(self.cap.isOpened()):
@@ -162,7 +186,7 @@ parser.add_argument('--gs',
     action='store_true',
     help='Grid search' )
 
-# {input_name} {output_name} {mode} {write_result_to_avi} {side_view} {delay_rate} {draw_skeleton}
+# {input_name} {output_name} {write_result_to_avi} {delay_rate} {draw_skeleton}
 
 if __name__ == "__main__":
     args = parser.parse_args()
