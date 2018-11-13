@@ -155,9 +155,9 @@ class SquatFormCorrector:
 
             reason = self._is_wrong_form(is_side=is_side)
             if reason:
-                cv2.putText(frame, reason, (50, 50), cv2.FONT_HERSHEY_COMPLEX, .8, (255, 50, 0), 2, lineType=cv2.LINE_AA)
+                cv2.putText(frame, reason, (50, 50), cv2.FONT_HERSHEY_COMPLEX, .8, (255, 0, 0), 2, lineType=cv2.LINE_AA)
             else:
-                cv2.putText(frame, "Good form!", (50, 50), cv2.FONT_HERSHEY_COMPLEX, .8, (255, 50, 0), 2, lineType=cv2.LINE_AA)
+                cv2.putText(frame, "Good form!", (50, 50), cv2.FONT_HERSHEY_COMPLEX, .8, (0, 255, 0), 2, lineType=cv2.LINE_AA)
 
             if self.write_flag:
                 self.vid_writer.write(frame)
@@ -171,25 +171,25 @@ class SquatFormCorrector:
         cv2.destroyAllWindows()
 
 
-parser = argparse.ArgumentParser(description='SquatFormCorrector')
-# TODO fix args
-parser.add_argument('--train',
-    action='store_true',
-    help='Train flag' )
-parser.add_argument('--test',
-    action='store_true',
-    help='Test flag' )
-parser.add_argument('--p',
-    action='store_true',
-    help='Test run the entire pipeline. Train->store->load->predict' )
-parser.add_argument('--gs',
-    action='store_true',
-    help='Grid search' )
+# parser = argparse.ArgumentParser(description='SquatFormCorrector')
+# # TODO fix args
+# parser.add_argument('--train',
+#     action='store_true',
+#     help='Train flag' )
+# parser.add_argument('--test',
+#     action='store_true',
+#     help='Test flag' )
+# parser.add_argument('--p',
+#     action='store_true',
+#     help='Test run the entire pipeline. Train->store->load->predict' )
+# parser.add_argument('--gs',
+#     action='store_true',
+#     help='Grid search' )
 
 # {input_name} {output_name} {write_result_to_avi} {delay_rate} {draw_skeleton}
 
 if __name__ == "__main__":
-    args = parser.parse_args()
+    # args = parser.parse_args()
     # TODO use args
-    corrector = SquatFormCorrector(input_source="sample_video.mp4", output_file_name="test.avi")
+    corrector = SquatFormCorrector(input_source=0, write_flag=False, output_file_name="test.avi")
     corrector.process(is_side=False, delay_rate=200, draw_skeleton=False)
