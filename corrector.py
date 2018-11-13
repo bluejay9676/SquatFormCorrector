@@ -53,7 +53,7 @@ class SquatFormCorrector:
         self.vid_writer = None
 
         if write_flag:
-            hasFrame, frame = cap.read()
+            hasFrame, frame = self.cap.read()
             self.vid_writer = cv2.VideoWriter(output_file_name, cv2.VideoWriter_fourcc('M','J','P','G'), 10, (frame.shape[1],frame.shape[0]))
 
         self.point_position = {} # k : point  v : (int, int) normalized location on the video.
@@ -68,7 +68,7 @@ class SquatFormCorrector:
 
     @staticmethod
     def _get_dist(pair1, pair2):
-        return sqrt(abs(pair1[0] - pair2[0]) ** 2 + abs(pair1[1] - pair2[1]) ** 2)
+        return math.sqrt(abs(pair1[0] - pair2[0]) ** 2 + abs(pair1[1] - pair2[1]) ** 2)
     
     def _is_wrong_form(self, is_side):
         """
@@ -95,18 +95,18 @@ class SquatFormCorrector:
         """
         # Check front view
         # Check if the points are above the threshold.
-        if (self.point_position[2] or self.point_position[5] or self.point_position[10] or self.point_position[13])
+        if (self.point_position[2] and self.point_position[5] and self.point_position[10] and self.point_position[13]):
             shoulder_width = self._get_dist(self.point_position[2], self.point_position[5])
             feet_width = self._get_dist(self.point_position[10], self.point_position[13])
             if abs(shoulder_width - feet_width) < 0.5:
                 return "Shoulder width stance Bro!"
-        if (self.point_position[9] or self.point_position[10] or self.point_position[12] or self.point_position[13]):
+        if (self.point_position[9] and self.point_position[10] and self.point_position[12] and self.point_position[13]):
             left_angle = self._get_angle(self.point_position[9], self.point_position[10])
             right_angle = self._get_angle(self.point_position[12], self.point_position[13])
-            if abs(left_angle - right_angle) < 0.5:
+            if abs(left_angle - math.pi / 2) < 0.3 or abs(right_angle - math.pi / 2) < 0.3:
                 return "Knees out Bro!"
-        if (self.point_position[8] or self.point_position[9] or self.point_position[11] or self.point_position[12]):
-            if (self.point_position[8][1] > self.point_position[9][1]) and (self.point_position[11][1] > self.point_position[12][1]):
+        if (self.point_position[8] and self.point_position[9] and self.point_position[11] and self.point_position[12]):
+            if (self.point_position[8][1] > self.point_position[9][1]) or (self.point_position[11][1] > self.point_position[12][1]):
                 return "ATG Bro!"
         return None
 
@@ -162,6 +162,8 @@ class SquatFormCorrector:
             if self.write_flag:
                 self.vid_writer.write(frame)
 
+            cv2.imshow('SquatCorrector', frame)
+
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         
@@ -192,4 +194,4 @@ if __name__ == "__main__":
     # args = parser.parse_args()
     # TODO use args
     corrector = SquatFormCorrector(input_source=0, write_flag=False, output_file_name="test.avi")
-    corrector.process(is_side=False, delay_rate=200, draw_skeleton=False)
+    corrector.process(is_side=False, delay_rate=250, draw_skeleton=False)
