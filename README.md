@@ -1,5 +1,6 @@
 # SquatFormCorrector
 
+What do you do if you don't have any friends to look over your ugly ass squat form?
 
 ## Set up
 1. Follow the instruction on https://www.learnopencv.com/install-opencv3-on-macos/ to set up opencv and necessary libs.

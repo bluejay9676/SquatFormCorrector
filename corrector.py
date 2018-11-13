@@ -3,6 +3,7 @@ import argparse
 import cv2
 import time
 import numpy as np
+import math
 
 """
 MPI:
@@ -56,18 +57,32 @@ class SquatFormCorrector:
 
         self.point_position = {} # k : point  v : (int, int) normalized location on the video.
 
+    @staticmethod
+    def _get_angle(pair1, pair2):
+        """
+        return angle between pair1 and pair2 in radian.
+        """
+        cos_t = abs(pair1[0] - pair2[0]) / abs(pair1[1] - pair2[1])
+        return 90 / math.pi - math.acos(cos_t)
     
     def _is_wrong_form(self, is_side):
         """
         Detect wrong squat form.
         If side view:
             1. Neck -> Back -> Groin == linear?
+                - Get angle from neck to back, and back to groin
+                - Are the angles close (< 3)?
             2. Knee farther than Feet?
+                - Feet.x + 5 (in the direction opposite to groin) < knee.x
             3. Hip under Knee?
+                - groin.y < knee.y
             4. Bar path (or neck path) == linear?
+                - TODO
         If front view:
             1. Shoulder width == stance width.
+                - shoulder1.x - shoulder2.x == feet1.x - feet2.x
             2. Are knees forming 11? (it should form M like shape)
+                - Get angle from feet to knee. Are they relatively forming 11?
         """
         raise NotImplementedError # TODO implement
 
