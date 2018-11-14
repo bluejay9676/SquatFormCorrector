@@ -292,9 +292,9 @@ class SquatFormCorrectorImage:
         try:
             reason = self._is_wrong_form(is_side=is_side)
             if reason:
-                cv2.putText(self.frame, reason, (50, 50), cv2.FONT_HERSHEY_COMPLEX, .8, (0, 0, 255), 2, lineType=cv2.LINE_AA)
+                cv2.putText(self.frame, reason, (50, 150), cv2.FONT_HERSHEY_COMPLEX, 2.7, (0, 0, 255), 2, lineType=cv2.LINE_AA)
             else:
-                cv2.putText(self.frame, "Good form!", (50, 50), cv2.FONT_HERSHEY_COMPLEX, .8, (0, 255, 0), 2, lineType=cv2.LINE_AA)
+                cv2.putText(self.frame, "Good form!", (50, 150), cv2.FONT_HERSHEY_COMPLEX, 2.7, (0, 255, 0), 2, lineType=cv2.LINE_AA)
         except Exception as e:
             print(e.__class__.__name__ + ': ' + str(e))
 
@@ -330,5 +330,5 @@ if __name__ == "__main__":
     # TODO use args
     # corrector = SquatFormCorrector(input_source=0, write_flag=False, output_file_name="test.avi")
     # corrector.process(is_side=False, delay_rate=250, draw_skeleton=False)
-    corrector = SquatFormCorrectorImage(input_source='photos/wrong_stance1.jpg', write_flag=True, output_file_name="test.jpg")
+    corrector = SquatFormCorrectorImage(input_source='photos/stand.jpg', write_flag=True, output_file_name="stand.jpg")
     corrector.process(is_side=False, delay_rate=250, draw_skeleton=True)
